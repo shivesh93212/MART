@@ -13,3 +13,8 @@ class LoginModel(BaseModel):
     email:str
     password:str
 
+class ProductCreate(BaseModel):
+    name: str
+    price: float
+    quantity: int
+
