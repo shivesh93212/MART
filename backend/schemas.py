@@ -18,3 +18,4 @@ class ProductCreate(BaseModel):
     price: float
     quantity: int
 
+
