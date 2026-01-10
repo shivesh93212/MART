@@ -234,3 +234,32 @@ def add_item_in_cart(user_id:int,product_id:int,quantity:int=1,db:Session=Depend
     }
 
 #***************************************************************UPDATE CART ITEM********************************************
+@app.patch("/cart/item/{item_id}")
+def update_cart(item_id:int,quantity:int,db:Session=Depends(get_db)):
+    cart_item=db.query(CartItem).filter(CartItem.id==item_id).first()
+
+    if cart_item is None:
+        raise HTTPException(status_code=404,detail="PRODUCT NOT FOUND IN CART")
+    
+    if quantity <0:
+        raise HTTPException(status_code=400,detail="QUANTITY NAVER IN NEGATIVE")
+    
+    if quantity==0:
+        db.delete(cart_item)
+        db.commit()
+
+        return {"message":"Item Remove From The Cart"}
+    
+    cart_item.quantity=quantity
+    db.commit()
+    db.refresh(cart_item)
+
+    return {
+        "message": "Quantity updated",
+        "cart_item_id": cart_item.id,
+        "quantity": cart_item.quantity
+    }
+
+
+    
+
