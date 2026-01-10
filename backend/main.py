@@ -84,9 +84,6 @@ def delete_product(id:int , db:Session=Depends(get_db)):
 def get_all_products(db:Session=Depends(get_db)):
     products=db.query(models.Product).all()
 
-    if not products:
-        raise HTTPException(status_code=404,detail="Product Not Found")
-
     return products
 
 # **************************************************UPDATE PRODUCT****************************************************
@@ -197,10 +194,14 @@ def add_item_in_cart(user_id:int,product_id:int,quantity:int=1,db:Session=Depend
     if user is None:
         raise HTTPException(status_code=404,detail="WRONG USER ID")
     
+    
     product=db.query(Product).filter(Product.id==product_id).first()
 
     if product is None:
         raise HTTPException(status_code=404,detail="WRONG PRODUCT ID")
+    
+    if quantity > product.quantity:
+          raise HTTPException(400, "Out of stock")
     
     cart=db.query(Cart).filter(Cart.user_id==user_id).first()
 
