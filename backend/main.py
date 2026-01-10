@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from models import Product
 from sqlalchemy.orm import Session
 import shutil
+import uuid
+import os
 
 app=FastAPI()
 
@@ -107,8 +109,6 @@ def update_product(
 
     if quantity is not None:
         product.quantity = quantity
-
-    # update image ONLY if provided
    
 
     db.commit()
@@ -117,3 +117,43 @@ def update_product(
 
 # **********************************************************UPDATE IMAGE**********************************************
 
+@app.patch("/product/{id}/image")
+def update_image(
+    id: int,
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+   
+    product = db.query(Product).filter(Product.id == id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="ID NOT FOUND")
+
+   
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="No image file received")
+
+    print("RECEIVED FILE:", image.filename)
+
+  
+    os.makedirs("images", exist_ok=True)
+
+    
+    filename = f"{uuid.uuid4()}_{image.filename}"
+    image_path = f"images/{filename}"
+
+    
+    try:
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"File save failed: {e}")
+
+  
+    product.image = image_path
+    db.commit()
+    db.refresh(product)
+
+    return {
+        "message": "IMAGE UPDATED SUCCESSFULLY",
+        
+    }

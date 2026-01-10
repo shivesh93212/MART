@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text,Float
 from database import Base
 from sqlalchemy.orm import relationship
 
 # ================= USER TABLE =================
+
 class User(Base):
     __tablename__ = "user"
 
@@ -15,12 +16,13 @@ class User(Base):
 
 
 # ================= PRODUCT TABLE =================
+
 class Product(Base):
     __tablename__ = "product"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    price = Column(Integer, nullable=False)
+    price = Column(Float, nullable=False)
     quantity = Column(Integer, nullable=False)
     image = Column(String)
 
@@ -28,6 +30,7 @@ class Product(Base):
 
 
 # ================= CART TABLE =================
+
 class Cart(Base):
     __tablename__ = "cart"
 
