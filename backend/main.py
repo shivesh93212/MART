@@ -3,7 +3,7 @@ from database import SessionLocal,Base,engine
 import models
 from auth import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
-from models import Product
+from models import Product,Cart,CartItem
 from sqlalchemy.orm import Session
 import shutil
 import uuid
@@ -84,6 +84,9 @@ def delete_product(id:int , db:Session=Depends(get_db)):
 def get_all_products(db:Session=Depends(get_db)):
     products=db.query(models.Product).all()
 
+    if not products:
+        raise HTTPException(status_code=404,detail="Product Not Found")
+
     return products
 
 # **************************************************UPDATE PRODUCT****************************************************
@@ -155,5 +158,35 @@ def update_image(
 
     return {
         "message": "IMAGE UPDATED SUCCESSFULLY",
-        
     }
+
+
+# =================================================CART==============================================================
+
+# *************************************************VIEW CART ITEM*********************************************************
+
+@app.get("/cart/{cart_id}/items")
+def get_all_item_in_cart(cart_id:int,db:Session=Depends(get_db)):
+    carts=db.query(CartItem).filter(CartItem.cart_id==cart_id).all()
+
+    if not carts:
+        raise HTTPException(status_code=404,detail="Cart is empty")
+    
+    return carts
+
+# ***************************************************************DELETE ITEMS IN CART**********************************
+
+@app.delete("/cart/item/{id}")
+def delete_cart_item(id:int,db:Session=Depends(get_db)):
+    carts=db.query(CartItem).filter(CartItem.id==id).first()
+
+    if carts is None:
+        raise HTTPException(status_code=404,detail="ID NOT FOUND")
+    
+    db.delete(carts)
+    db.commit()
+
+    return {"message":"Cart Deleted Successfully!"}
+
+# *************************************************************ADD ITEM IN CART***************************************
+

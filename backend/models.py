@@ -12,7 +12,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password = Column(Text, nullable=False)
 
-    carts = relationship("Cart", back_populates="user")
+    cart = relationship("Cart", back_populates="user",uselist=False)
 
 
 # ================= PRODUCT TABLE =================
@@ -26,7 +26,6 @@ class Product(Base):
     quantity = Column(Integer, nullable=False)
     image = Column(String)
 
-    carts = relationship("Cart", back_populates="product")
 
 
 # ================= CART TABLE =================
@@ -36,8 +35,21 @@ class Cart(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"))
-    product_id = Column(Integer, ForeignKey("product.id"))
-    quantity = Column(Integer, nullable=False)
+   
 
-    user = relationship("User", back_populates="carts")
-    product = relationship("Product", back_populates="carts")
+    user = relationship("User", back_populates="cart")
+    items = relationship("CartItem", back_populates="cart",cascade="all, delete")
+
+# ==================CART ITEM =====================
+
+class CartItem(Base):
+    __tablename__="cart_items"
+
+    id=Column(Integer,primary_key=True,index=True)
+    cart_id=Column(Integer,ForeignKey("cart.id"),nullable=False)
+    product_id=Column(Integer,ForeignKey("product.id"),nullable=False)
+    quantity=Column(Integer,nullable=False,default=1)
+
+    cart = relationship("Cart", back_populates="items")
+    product = relationship("Product")
+
