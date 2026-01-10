@@ -3,7 +3,7 @@ from database import SessionLocal,Base,engine
 import models
 from auth import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
-from models import Product,Cart,CartItem
+from models import Product,Cart,CartItem,User
 from sqlalchemy.orm import Session
 import shutil
 import uuid
@@ -190,3 +190,47 @@ def delete_cart_item(id:int,db:Session=Depends(get_db)):
 
 # *************************************************************ADD ITEM IN CART***************************************
 
+@app.post("/cart/add")
+def add_item_in_cart(user_id:int,product_id:int,quantity:int=1,db:Session=Depends(get_db)):
+    user=db.query(User).filter(User.id==user_id).first()
+
+    if user is None:
+        raise HTTPException(status_code=404,detail="WRONG USER ID")
+    
+    product=db.query(Product).filter(Product.id==product_id).first()
+
+    if product is None:
+        raise HTTPException(status_code=404,detail="WRONG PRODUCT ID")
+    
+    cart=db.query(Cart).filter(Cart.user_id==user_id).first()
+
+    if not cart:
+        cart=Cart(user_id=user.id)
+        db.add(cart)
+        db.commit()
+        db.refresh(cart)
+
+    cart_item=db.query(CartItem).filter(CartItem.cart_id==cart.id,CartItem.product_id==product.id).first()
+
+    if cart_item:
+        cart_item.quantity+=quantity
+
+    else:
+        cart_item=CartItem(
+            cart_id=cart.id,
+            product_id=product.id,
+            quantity=quantity
+        )
+        db.add(cart_item)
+
+    db.commit()
+    db.refresh(cart_item)
+
+    return {
+        "message": "Product added to cart successfully",
+        "cart_id": cart.id,
+        "product_id": product.id,
+        "quantity": cart_item.quantity
+    }
+
+#***************************************************************UPDATE CART ITEM********************************************
