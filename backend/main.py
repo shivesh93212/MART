@@ -9,8 +9,13 @@ import shutil
 import uuid
 import os
 from datetime import datetime
+import razorpay
+from dotenv import load_dotenv
 
 app=FastAPI()
+
+load_dotenv()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,6 +51,8 @@ def add_product(
     image: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
+    os.makedirs("images", exist_ok=True)
+    filename = f"{uuid.uuid4()}_{image.filename}"
     image_path=f"images/{image.filename}"
     with open(image_path,"wb") as buffer:
       shutil.copyfileobj(image.file,buffer)
@@ -163,7 +170,7 @@ def update_image(
 
 # *************************************************VIEW CART ITEM*********************************************************
 
-@app.get("/cart/{cart_id}/items")
+@app.get("/cart/{cart_id}")
 def get_all_item_in_cart(cart_id:int,db:Session=Depends(get_db)):
     carts=db.query(CartItem).filter(CartItem.cart_id==cart_id).all()
 
@@ -250,8 +257,11 @@ def update_cart(item_id:int,quantity:int,db:Session=Depends(get_db)):
     if quantity==0:
         db.delete(cart_item)
         db.commit()
-
         return {"message":"Item Remove From The Cart"}
+    
+    if quantity > cart_item.product.quantity:
+        raise HTTPException(400, "Out of stock")
+
     
     cart_item.quantity=quantity
     db.commit()
@@ -265,69 +275,6 @@ def update_cart(item_id:int,quantity:int,db:Session=Depends(get_db)):
 
 
     # ====================================================================ORDERS=================================================
-
-    # **********************************************PLACE ORDERS****************************************************************
-
-# ============================ ORDERS ============================
-
-@app.post("/order/place")
-def place_order(user_id: int, db: Session = Depends(get_db)):
-    cart = db.query(Cart).filter(Cart.user_id == user_id).first()
-    if not cart:
-        raise HTTPException(404, "CART NOT FOUND")
-
-    cart_items = db.query(CartItem).filter(CartItem.cart_id == cart.id).all()
-    if not cart_items:
-        raise HTTPException(400, "Cart is Empty")
-
-    total_amount = 0
-
-    for item in cart_items:
-        product = db.query(Product).filter(Product.id == item.product_id).first()
-
-        if item.quantity > product.quantity:
-            raise HTTPException(
-                400,
-                f"Only {product.quantity} items left for {product.name}"
-            )
-
-        total_amount += item.quantity * product.price
-
-    order = Order(
-        user_id=user_id,
-        total_amount=total_amount,
-        status="PLACED",
-        created_at=datetime.utcnow()
-    )
-
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-
-    # ✅ SAVE ORDER ITEMS
-    for item in cart_items:
-        product = db.query(Product).filter(Product.id == item.product_id).first()
-
-        order_item = OrderItem(
-            order_id=order.id,
-            product_id=product.id,
-            quantity=item.quantity,
-            price=product.price
-        )
-
-        product.quantity -= item.quantity
-        db.add(order_item)
-
-    db.query(CartItem).filter(CartItem.cart_id == cart.id).delete()
-    db.commit()
-
-    return {
-        "order_id": order.id,
-        "total": order.total_amount,
-        "status": order.status,
-        "items": order.items
-    }
-
 
 # ************************************************************GRT USER ORDERS***************************************************
 
@@ -351,4 +298,136 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
         "status": order.status,
         "items": order.items
     }
-  
+
+
+# ===============================================PAYMENT======================================
+
+key_id = os.getenv("RAZORPAY_KEY_ID")
+key_secret = os.getenv("RAZORPAY_KEY_SECRET")
+
+print("RAZORPAY_KEY_ID =", key_id)
+print("RAZORPAY_KEY_SECRET =", key_secret)
+
+if not key_id or not key_secret:
+    raise RuntimeError("Razorpay keys not loaded")
+
+client = razorpay.Client(auth=(key_id, key_secret))
+
+
+@app.post("/payment/create_order")
+def create_payment_order(user_id:int,db:Session=Depends(get_db)):
+    cart=db.query(Cart).filter(Cart.user_id==user_id).first()
+
+    if cart is None:
+        raise HTTPException(404,"Cart not found")
+    
+    cart_items=db.query(CartItem).filter(CartItem.cart_id==cart.id).all()
+
+    if not cart_items:
+        raise HTTPException(400,"Cart is empty")
+    
+    total_amount = 0
+    for item in cart_items:
+        product = db.query(Product).filter(
+            Product.id == item.product_id
+        ).first()
+
+        
+        if item.quantity > product.quantity:
+            raise HTTPException(
+                400,
+                f"Only {product.quantity} items left for {product.name}"
+            )
+
+        total_amount += item.quantity * product.price
+    
+    order=Order(
+        user_id=user_id,
+        total_amount=total_amount,
+        status="CREATED"
+    )
+
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    payment_order=client.order.create({
+        "amount":total_amount*100,
+        "currency":"INR",
+        "receipt":f"order_{order.id}"
+    })
+
+    return {
+        "order_id":order.id,
+        "razorpay_order_id":payment_order["id"],
+        "amount":total_amount,
+        "currency":"INR",
+        "key":os.getenv("RAZORPAY_KEY_ID")
+    }
+
+#*********************************************PAYMENT VERIFICATION**********************************
+
+@app.post("/payment/verify")
+def verify_payment(
+    order_id:int,
+    razorpay_payment_id: str,
+    razorpay_order_id: str,
+    razorpay_signature: str,
+    db:Session=Depends(get_db)
+):
+    try:
+        client.utility.verify_payment_signature({
+            "razorpay_payment_id": razorpay_payment_id,
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_signature": razorpay_signature
+        })
+    except:
+        raise HTTPException(400,"Payment verification failed")
+    
+    order=db.query(Order).filter(Order.id==order_id).first()
+
+    if not order:
+        raise HTTPException(404,"Order not found")
+    
+    if order.status=="PAID":
+        return {"message":"Order already paid"}
+    
+    order.status="PAID"
+    order.payment_id=razorpay_payment_id
+
+    cart=db.query(Cart).filter(Cart.user_id==order.user_id).first()
+    if not cart:
+       raise HTTPException(400, "Cart not found")
+
+    cart_items=db.query(CartItem).filter(CartItem.cart_id==cart.id).all()
+
+    for item in cart_items:
+        product = db.query(Product).filter(
+            Product.id == item.product_id
+        ).first()
+
+        if item.quantity > product.quantity:
+            raise HTTPException(400, "Stock changed, please retry")
+
+        product.quantity -= item.quantity
+
+        order_item = OrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            quantity=item.quantity,
+            price=product.price
+        )
+        db.add(order_item)
+
+    # 🔧 CHANGED: cart clear AFTER successful payment
+    db.query(CartItem).filter(
+        CartItem.cart_id == cart.id
+    ).delete()
+
+    db.commit()
+
+    return {
+        "message": "Payment successful, order confirmed",
+        "order_id": order.id
+    }
+    
