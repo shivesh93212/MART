@@ -305,9 +305,6 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
 key_id = os.getenv("RAZORPAY_KEY_ID")
 key_secret = os.getenv("RAZORPAY_KEY_SECRET")
 
-print("RAZORPAY_KEY_ID =", key_id)
-print("RAZORPAY_KEY_SECRET =", key_secret)
-
 if not key_id or not key_secret:
     raise RuntimeError("Razorpay keys not loaded")
 
@@ -406,8 +403,6 @@ def verify_payment(
             Product.id == item.product_id
         ).first()
 
-        if item.quantity > product.quantity:
-            raise HTTPException(400, "Stock changed, please retry")
 
         product.quantity -= item.quantity
 
