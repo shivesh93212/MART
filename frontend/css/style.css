@@ -1,0 +1,39 @@
+body {
+  font-family: Arial;
+  background: #f7f7f7;
+  margin: 0;
+}
+
+header {
+  background: #0c831f;
+  color: white;
+  padding: 15px;
+  font-size: 20px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+  gap: 15px;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.card img {
+  height: 120px;
+}
+
+button {
+  background: #0c831f;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
