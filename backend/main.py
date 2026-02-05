@@ -177,12 +177,26 @@ def update_image(
 
 @app.get("/cart/{cart_id}")
 def get_all_item_in_cart(cart_id:int,db:Session=Depends(get_db)):
-    carts=db.query(CartItem).filter(CartItem.cart_id==cart_id).all()
+    carts=db.query(CartItem).filter(CartItem.cart_id==cart_id).order_by(CartItem.id).all()
+
 
     if not carts:
         raise HTTPException(status_code=404,detail="Cart is empty")
     
-    return carts
+    cart_data = []
+    for item in carts:
+        cart_data.append({
+            "id": item.id,
+            "cart_id": item.cart_id,
+            "product_id": item.product_id,
+            "quantity": item.quantity,
+            "product_name": item.product.name,
+            "price": item.product.price,
+            "image": item.product.image,
+            "total_price": item.quantity * item.product.price
+        })
+
+    return cart_data
 
 # ***************************************************************DELETE ITEMS IN CART**********************************
 
