@@ -11,6 +11,7 @@ import os
 from datetime import datetime
 import razorpay
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 
 app=FastAPI()
 
@@ -28,6 +29,9 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
+
+os.makedirs("images", exist_ok=True)
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 
 def get_db():
@@ -53,7 +57,8 @@ def add_product(
 ):
     os.makedirs("images", exist_ok=True)
     filename = f"{uuid.uuid4()}_{image.filename}"
-    image_path=f"images/{image.filename}"
+    image_path=f"images/{filename}"
+
     with open(image_path,"wb") as buffer:
       shutil.copyfileobj(image.file,buffer)
 
@@ -252,14 +257,18 @@ def update_cart(item_id:int,quantity:int,db:Session=Depends(get_db)):
         raise HTTPException(status_code=404,detail="PRODUCT NOT FOUND IN CART")
     
     if quantity <0:
-        raise HTTPException(status_code=400,detail="QUANTITY NAVER IN NEGATIVE")
+        raise HTTPException(status_code=400,detail="QUANTITY NEVER IN NEGATIVE")
     
     if quantity==0:
         db.delete(cart_item)
         db.commit()
         return {"message":"Item Remove From The Cart"}
-    
-    if quantity > cart_item.product.quantity:
+
+    product=db.query(Product).filter(Product.id==cart_item.product_id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+
+    if quantity > product.quantity:
         raise HTTPException(400, "Out of stock")
 
     
@@ -328,6 +337,9 @@ def create_payment_order(user_id:int,db:Session=Depends(get_db)):
         product = db.query(Product).filter(
             Product.id == item.product_id
         ).first()
+
+        if not product:
+            raise HTTPException(404, "Product not found")
 
         
         if item.quantity > product.quantity:
@@ -403,6 +415,11 @@ def verify_payment(
             Product.id == item.product_id
         ).first()
 
+        if not product:
+            raise HTTPException(404, "Product not found")
+
+        if item.quantity > product.quantity:
+            raise HTTPException(400, f"Not enough stock for {product.name}")
 
         product.quantity -= item.quantity
 
@@ -414,7 +431,6 @@ def verify_payment(
         )
         db.add(order_item)
 
-    # 🔧 CHANGED: cart clear AFTER successful payment
     db.query(CartItem).filter(
         CartItem.cart_id == cart.id
     ).delete()
@@ -425,4 +441,3 @@ def verify_payment(
         "message": "Payment successful, order confirmed",
         "order_id": order.id
     }
-    
