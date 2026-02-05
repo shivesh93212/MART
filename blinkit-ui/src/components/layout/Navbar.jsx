@@ -12,7 +12,7 @@ export default function Navbar(){
                 <input 
                 type="text"
                 placeholder="Search for products..."
-                classname="w-full px-4 py-2 border rounded-lg outline-none focus:ring-green-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-green-500"
                 />  
             </div>
 
@@ -25,6 +25,16 @@ export default function Navbar(){
                 >
                     My cart
                 </Link>
+
+                <Link to="/add-product" className="text-gray-700 font-medium">
+                    Add Product
+                </Link>
+
+                <Link to="/" className="text-gray-700 font-medium">
+                  Home
+                 </Link>
+
+
             </div>
          </div>
 

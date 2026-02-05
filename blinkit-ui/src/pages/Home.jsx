@@ -1,6 +1,6 @@
 import React  from 'react'
 import { useEffect, useState } from "react";
-import {getAllProduct} from "../api/productApi"
+import {getAllProducts} from "../api/productApi"
 import {addToCart} from "../api/cartApi"
 import ProductGrid from "../components/product/ProductGrid"
 
@@ -20,7 +20,7 @@ const Home = () => {
     },[])
 
     const fetchProducts=async ()=>{
-      const data=await getAllProduct();
+      const data=await getAllProducts();
       setProducts(data)
     }
     const handleAdd=async (productId)=>{
