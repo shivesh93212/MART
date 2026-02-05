@@ -1,35 +1,63 @@
+export default function ProductCard({
+  product,
+  cartItem,
+  onAdd,
+  onIncrease,
+  onDecrease,
+}) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition p-3 flex flex-col">
+      <div className="h-32 flex items-center justify-center overflow-hidden">
+        <img
+          src={`http://localhost:8000/${product.image}`}
+          alt={product.name}
+          className="h-full object-contain"
+        />
+      </div>
 
-export default function Productcard({product,onAdd}){
-    return (
-        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-3 flex flex-col">
-            
-            <div className="h-40 flex items-center justify-center overflow-hidden">
-                <img
-                src={`http://localhost:8000/${product.image}`}
-                alt={product.name}
-                className="h-full object-contain"
-                />
-            </div>
+      <h3 className="font-semibold text-gray-800 text-sm mt-2 line-clamp-2">
+        {product.name}
+      </h3>
 
-            <h3 className="font-semibold text-gray-800 mt-2 line-clamp-1">
-                {product.name}
-            </h3>
+      <p className="text-gray-700 font-bold mt-1 text-sm">
+        ₹{product.price}
+      </p>
 
-            <p className="tex-gray-600 text-sm mt-1">
-                ₹{product.price}
-            </p>
+      <p className="text-xs text-gray-500 mt-1">
+        Stock: {product.quantity}
+      </p>
 
-            <p className="text-xs text-gray-500 mt-1">
-                Stock: {product.quantity}
-            </p>
-            
-            <button 
-            onClick={()=>onAdd(product.id)}
-            disable={product.quantity<=0}
-            className="mt-3 bg-green-600 text-white py-2 rounded-lg font-semobold hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+      <div className="mt-3">
+        {/* ✅ NEW: agar cartItem nahi hai tab ADD button show */}
+        {!cartItem ? (
+          <button
+            onClick={() => onAdd(product.id)} // ✅ NEW: add to cart call
+            disabled={product.quantity <= 0}
+            className="w-full border border-green-600 text-green-600 font-bold py-2 rounded-xl hover:bg-green-600 hover:text-white transition disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white"
+          >
+            ADD
+          </button>
+        ) : (
+          // ✅ NEW: agar cartItem exist karta hai to stepper show
+          <div className="flex items-center justify-between bg-green-600 text-white rounded-xl px-3 py-2 font-bold">
+            <button
+              onClick={() => onDecrease(cartItem.id, cartItem.quantity)} // ✅ NEW: decrease qty
+              className="text-lg"
             >
-                Add
+              -
             </button>
-        </div>
-    )
+
+            <span>{cartItem.quantity}</span>
+
+            <button
+              onClick={() => onIncrease(cartItem.id, cartItem.quantity)} // ✅ NEW: increase qty
+              className="text-lg"
+            >
+              +
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

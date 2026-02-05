@@ -1,53 +1,85 @@
-import React  from 'react'
 import { useEffect, useState } from "react";
-import {getAllProducts} from "../api/productApi"
-import {addToCart} from "../api/cartApi"
-import ProductGrid from "../components/product/ProductGrid"
+import { getAllProducts } from "../api/productApi";
+import { addToCart, getCartItems, updateCartItem } from "../api/cartApi";
+import ProductGrid from "../components/product/ProductGrid";
+// import CategoryBar from "../components/home/CategoryBar";
+// import Banner from "../components/home/Banner";
+import { useCart } from "../context/CartContext"; // ✅ FIXED: correct path
 
+export default function Home() {
+  const { refreshCartCount } = useCart(); // ✅ FIXED: use refresh function for realtime badge
 
+  const [products, setProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]); // ✅ cart items store
 
-const Home = () => {
+  const userId = 1;
+  const cartId = localStorage.getItem("cartId"); // ✅ cartId localStorage se
 
-    const [products,setProducts]=useState([])
-    const [cartId,setCartId]=useState(localStorage.getItem("cartId")||null)
+  useEffect(() => {
+    fetchProducts();
+    if (cartId) fetchCart(); // ✅ if cart exists then fetch
+  }, []);
 
-    const userId=1
+  const fetchProducts = async () => {
+    const data = await getAllProducts();
+    setProducts(data);
+  };
 
-
-    useEffect(()=>{
-     fetchProducts();
-     
-    },[])
-
-    const fetchProducts=async ()=>{
-      const data=await getAllProducts();
-      setProducts(data)
+  const fetchCart = async () => {
+    try {
+      const data = await getCartItems(cartId);
+      setCartItems(data);
+    } catch (err) {
+      setCartItems([]);
     }
-    const handleAdd=async (productId)=>{
-        try{
-          const res=await addToCart(userId,productId,1)
+  };
 
-          if(res.cart_id){
-            setCartId(res.cart_id)
-            localStorage.setItem("cartId",res.cart_id)
-          }
-          alert("Added to cart ✅")
-        }
-        catch(err){
-          alert(err.response?.data?.detail || "Error adding to cart")
+  const handleAdd = async (productId) => {
+    const res = await addToCart(userId, productId, 1);
 
-        }
+    if (res.cart_id) {
+      localStorage.setItem("cartId", res.cart_id); // ✅ cartId save
     }
+
+    fetchCart(); // ✅ refresh cart items
+    refreshCartCount(); // ✅ NEW: realtime badge update
+  };
+
+  const handleIncrease = async (itemId, qty) => {
+    await updateCartItem(itemId, qty + 1);
+    fetchCart(); // ✅ refresh cart items
+    refreshCartCount(); // ✅ NEW: realtime badge update
+  };
+
+  const handleDecrease = async (itemId, qty) => {
+    await updateCartItem(itemId, qty - 1);
+    fetchCart(); // ✅ refresh cart items
+    refreshCartCount(); // ✅ NEW: realtime badge update
+  };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
-      <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-5">
-        Groceries delivered in minutes 🚀
-      </h1>
-      <ProductGrid products={products} onAdd={handleAdd}/>
-      
-    </div>
-  )
-}
+    <div className="bg-gray-50 min-h-screen">
+      {/* <div className="max-w-6xl mx-auto px-4 pt-6">
+        <Banner />
+      </div> */}
 
-export default Home
+      {/* <div className="max-w-6xl mx-auto px-4 mt-6">
+        <CategoryBar />
+      </div> */}
+
+      <div className="max-w-6xl mx-auto px-4 mt-8 pb-10">
+        <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4">
+          Best Deals For You 🔥
+        </h2>
+
+        <ProductGrid
+          products={products}
+          cartItems={cartItems}
+          onAdd={handleAdd}
+          onIncrease={handleIncrease}
+          onDecrease={handleDecrease}
+        />
+      </div>
+    </div>
+  );
+}

@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { deleteCartItem, getCartItems, updateCartItem } from "../api/cartApi";
-import { getAllProducts } from "../api/productApi";
 import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext"; // ✅ NEW: import CartContext
 
 export default function Cart() {
   const cartId = localStorage.getItem("cartId");
   const [items, setItems] = useState([]);
-  const [products, setProducts] = useState([]);
+
+  const { refreshCartCount } = useCart(); // ✅ NEW: realtime badge refresh
 
   useEffect(() => {
-    if (cartId) {
-      fetchCart();
-      fetchProducts();
-    }
+    if (cartId) fetchCart();
   }, [cartId]);
 
   const fetchCart = async () => {
@@ -24,34 +22,21 @@ export default function Cart() {
     }
   };
 
-  const fetchProducts = async () => {
-    try {
-      const data = await getAllProducts();
-      setProducts(data);
-    } catch (err) {
-      setProducts([]);
-    }
-  };
-
   const handleUpdate = async (itemId, qty) => {
     if (qty < 0) return;
+
     await updateCartItem(itemId, qty);
-    fetchCart();
+    fetchCart(); // ✅ refresh cart UI
+    refreshCartCount(); // ✅ NEW: update navbar badge
   };
 
   const handleDelete = async (itemId) => {
     await deleteCartItem(itemId);
-    fetchCart();
+    fetchCart(); // ✅ refresh cart UI
+    refreshCartCount(); // ✅ NEW: update navbar badge
   };
 
-  const getProduct = (productId) => {
-    return products.find((p) => p.id === productId);
-  };
-
-  const totalAmount = items.reduce((sum, item) => {
-    const product = getProduct(item.product_id);
-    return sum + (product ? product.price * item.quantity : 0);
-  }, 0);
+  const totalAmount = items.reduce((sum, item) => sum + item.total_price, 0);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -63,68 +48,62 @@ export default function Cart() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Left Items */}
           <div className="md:col-span-2 space-y-4">
-            {items.map((item) => {
-              const product = getProduct(item.product_id);
-
-              return (
-                <div
-                  key={item.id}
-                  className="bg-white p-4 rounded-2xl shadow-sm flex gap-4 items-center"
-                >
-                  {/* Image */}
-                  <div className="w-20 h-20 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
-                    {product ? (
-                      <img
-                        src={`http://localhost:8000/${product.image}`}
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <p className="text-xs text-gray-400">No Image</p>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800">
-                      {product ? product.name : "Loading..."}
-                    </h3>
-
-                    <p className="text-gray-600 text-sm mt-1">
-                      ₹{product ? product.price : 0}
-                    </p>
-
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="text-red-500 text-sm font-semibold mt-2"
-                    >
-                      Remove
-                    </button>
-                  </div>
-
-                  {/* Quantity */}
-                  <div className="flex items-center gap-2 bg-green-50 border border-green-300 rounded-xl px-3 py-2">
-                    <button
-                      onClick={() => handleUpdate(item.id, item.quantity - 1)}
-                      className="font-bold text-green-700"
-                    >
-                      -
-                    </button>
-
-                    <span className="font-bold text-gray-800">
-                      {item.quantity}
-                    </span>
-
-                    <button
-                      onClick={() => handleUpdate(item.id, item.quantity + 1)}
-                      className="font-bold text-green-700"
-                    >
-                      +
-                    </button>
-                  </div>
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white p-4 rounded-2xl shadow-sm flex gap-4 items-center"
+              >
+                {/* Image */}
+                <div className="w-20 h-20 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
+                  <img
+                    src={`http://localhost:8000/${item.image}`}
+                    alt={item.product_name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-              );
-            })}
+
+                {/* Info */}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800">
+                    {item.product_name}
+                  </h3>
+
+                  <p className="text-gray-600 text-sm mt-1">₹{item.price}</p>
+
+                  <p className="text-gray-800 font-bold mt-1">
+                    Total: ₹{item.total_price}
+                  </p>
+
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-500 text-sm font-semibold mt-2"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                {/* Quantity */}
+                <div className="flex items-center gap-2 bg-green-50 border border-green-300 rounded-xl px-3 py-2">
+                  <button
+                    onClick={() => handleUpdate(item.id, item.quantity - 1)}
+                    className="font-bold text-green-700"
+                  >
+                    -
+                  </button>
+
+                  <span className="font-bold text-gray-800">
+                    {item.quantity}
+                  </span>
+
+                  <button
+                    onClick={() => handleUpdate(item.id, item.quantity + 1)}
+                    className="font-bold text-green-700"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Right Summary */}
