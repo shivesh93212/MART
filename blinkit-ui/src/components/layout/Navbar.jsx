@@ -38,7 +38,7 @@ export default function Navbar() {
           <Link to="/orders" className="text-gray-700 font-medium">
             Orders
           </Link>
-
+          
           {/* ✅ Cart Button with realtime Badge */}
           <Link
             to="/cart"
@@ -52,6 +52,10 @@ export default function Navbar() {
                 {cartCount}
               </span>
             )}
+          </Link>
+
+          <Link to="/login" classname="text-gray-700 font-medium">
+          Login
           </Link>
         </div>
       </div>
