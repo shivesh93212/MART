@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {signupUser,loginUser} from "../api/authApi"
+
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -8,12 +10,23 @@ export default function Register() {
 
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+      try{
+        await signupUser({name,email,password})
+        const loginData=await loginUser({email,password})
+        localStorage.setItem("token",loginData.access_token)
+        localStorage.setItem("userId",loginData.user_id)
+        localStorage.setItem("role","user")
+
+        navigate("/");
+        window.location.reload()
+      }
+      catch(err){
+        alert(err.response?.data?.detail || "signup failed")
+      }
 
     // ✅ TEMP: backend register connect baad me
-    alert("Registered Successfully ✅");
-    navigate("/");
   };
 
   return (

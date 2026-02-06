@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {loginUser} from "../api/authApi"
+
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,17 +11,29 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin =async (e) => {
     e.preventDefault();
+     try{
 
-    // ✅ TEMP: abhi backend auth connect nahi kiya
+     const data=await loginUser({email,password})
+
+    localStorage.setItem("token",data.access_token)
+    localStorage.setItem("userId",data.user_id)
+    
+    
+    
     if (role === "admin") {
-      localStorage.setItem("role", "admin"); // ✅ store role
+      window.location.href="/add-product"
+
       navigate("/add-product"); // ✅ admin dashboard
     } else {
-      localStorage.setItem("role", "user"); // ✅ store role
-      navigate("/"); // ✅ home page
+       // ✅ home page
+      window.location.href="/"
     }
+  }
+  catch(err){
+    alert(err.response?.data?.detail || "Login failed")
+  }
   };
 
   return (

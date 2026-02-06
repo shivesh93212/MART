@@ -1,12 +1,33 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext"; // ✅ NEW: context import
 import {useSearch} from "../../context/SearchContext"
-
+import {useEffect,useState}  from "react"
 
 export default function Navbar() {
   const { cartCount } = useCart(); // ✅ NEW: realtime cartCount
   const {search,setSearch}=useSearch()
+  
 
+  const [isLoggedIn,setIsLoggedIn]=useState(false)
+  const navigate=useNavigate()
+   
+const role=localStorage.getItem("role")
+
+
+  useEffect(()=>{
+    const token=localStorage.getItem("token")
+    setIsLoggedIn(!!token)
+  },[])
+
+const handleLogout=()=>{
+  localStorage.removeItem("token")
+  localStorage.removeItem("userId")
+  localStorage.removeItem("role")
+  localStorage.removeItem("cartId")
+  setIsLoggedIn(false)
+  window.location.reload()
+  navigate("/login")
+}
 
   return (
     <div className="bg-white shadow-sm sticky top-0 z-50">
@@ -30,10 +51,11 @@ export default function Navbar() {
           <Link to="/" className="text-gray-700 font-medium">
             Home
           </Link>
-
+          {role==="admin" &&(
           <Link to="/add-product" className="text-gray-700 font-medium">
             Add Product
           </Link>
+          )}
 
           <Link to="/orders" className="text-gray-700 font-medium">
             Orders
@@ -54,9 +76,18 @@ export default function Navbar() {
             )}
           </Link>
 
-          <Link to="/login" classname="text-gray-700 font-medium">
+          {!isLoggedIn ?(<Link to="/login" classname="text-gray-700 font-medium">
           Login
           </Link>
+          ):(
+            <button
+            onClick={handleLogout}
+            className="text-red-500 font-semibold hover:text-red-600 transition"
+            >
+              Logout
+            </button>
+          )}
+
         </div>
       </div>
 
