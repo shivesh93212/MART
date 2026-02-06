@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext"; // ✅ NEW: context import
+import {useSearch} from "../../context/SearchContext"
+
 
 export default function Navbar() {
   const { cartCount } = useCart(); // ✅ NEW: realtime cartCount
+  const {search,setSearch}=useSearch()
+
 
   return (
     <div className="bg-white shadow-sm sticky top-0 z-50">
@@ -16,6 +20,8 @@ export default function Navbar() {
           <input
             type="text"
             placeholder="Search for products..."
+            value={search}
+            onChange={(e)=>setSearch(e.target.value)}
             className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
@@ -54,6 +60,8 @@ export default function Navbar() {
         <input
           type="text"
           placeholder="Search for products..."
+          value={search}
+          onChange={(e)=>setSearch(e.target.value)}
           className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>

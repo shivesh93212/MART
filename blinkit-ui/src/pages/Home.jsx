@@ -5,12 +5,18 @@ import ProductGrid from "../components/product/ProductGrid";
 // import CategoryBar from "../components/home/CategoryBar";
 // import Banner from "../components/home/Banner";
 import { useCart } from "../context/CartContext"; // ✅ FIXED: correct path
+import {useSearch} from "../context/SearchContext"
+
 
 export default function Home() {
   const { refreshCartCount } = useCart(); // ✅ FIXED: use refresh function for realtime badge
+  const {search} = useSearch()
 
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]); // ✅ cart items store
+  
+  const filteredProducts=products.filter((p)=>(p.name||"").toLowerCase().includes((search||"").toLowerCase().trim()))
+
 
   const userId = 1;
   const cartId = localStorage.getItem("cartId"); // ✅ cartId localStorage se
@@ -73,7 +79,8 @@ export default function Home() {
         </h2>
 
         <ProductGrid
-          products={products}
+
+          products={filteredProducts}
           cartItems={cartItems}
           onAdd={handleAdd}
           onIncrease={handleIncrease}
