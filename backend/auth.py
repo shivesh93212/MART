@@ -23,10 +23,8 @@ def signup(user:SignupModel,db:Session=Depends(get_db)):
 
     if db_email is not None:
         raise HTTPException(status_code=400,detail="email alredy exists")
-    db_username=db.query(User).filter(User.name==user.email).first()
+   
 
-    if db_username is not None:
-        raise HTTPException(status_code=400,detail="Username alredy exist")
     
     hashed=pwd_context.hash(user.password[:72])
     new_user=User(
