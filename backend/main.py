@@ -386,6 +386,7 @@ def create_payment_order(user_id:int,db:Session=Depends(get_db)):
         "amount":total_amount,
         "currency":"INR",
         "key":os.getenv("RAZORPAY_KEY_ID")
+        
     }
 
 #*********************************************PAYMENT VERIFICATION**********************************
