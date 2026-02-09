@@ -6,9 +6,12 @@ import ProductGrid from "../components/product/ProductGrid";
 // import Banner from "../components/home/Banner";
 import { useCart } from "../context/CartContext"; // ✅ FIXED: correct path
 import {useSearch} from "../context/SearchContext"
+import UserCard from "../components/user/UserCard"
 
 
 export default function Home() {
+
+
   const { refreshCartCount } = useCart(); // ✅ FIXED: use refresh function for realtime badge
   const {search} = useSearch()
 
@@ -64,7 +67,12 @@ export default function Home() {
   };
 
   return (
+    
     <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 mt-6">
+        <UserCard />
+      </div>
+      
       {/* <div className="max-w-6xl mx-auto px-4 pt-6">
         <Banner />
       </div> */}

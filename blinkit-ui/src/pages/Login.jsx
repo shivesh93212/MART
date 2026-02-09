@@ -20,7 +20,11 @@ export default function Login() {
     localStorage.setItem("token",data.access_token)
     localStorage.setItem("userId",data.user_id)
     
+    localStorage.removeItem("cartId")
     
+    localStorage.setItem("name",data.name)
+    localStorage.setItem("email",data.email)
+    localStorage.setItem("role",role)
     
     if (role === "admin") {
       window.location.href="/add-product"

@@ -18,6 +18,8 @@ export default function Register() {
         localStorage.setItem("token",loginData.access_token)
         localStorage.setItem("userId",loginData.user_id)
         localStorage.setItem("role","user")
+        localStorage.setItem("name",name)
+        localStorage.setItem("email",email)
 
         navigate("/");
         window.location.reload()
@@ -26,7 +28,7 @@ export default function Register() {
         alert(err.response?.data?.detail || "signup failed")
       }
 
-    // ✅ TEMP: backend register connect baad me
+   
   };
 
   return (

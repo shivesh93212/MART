@@ -4,7 +4,7 @@ import {useSearch} from "../../context/SearchContext"
 import {useEffect,useState}  from "react"
 
 export default function Navbar() {
-  const { cartCount } = useCart(); // ✅ NEW: realtime cartCount
+  const { cartCount } = useCart(); 
   const {search,setSearch}=useSearch()
   
 
@@ -24,6 +24,8 @@ const handleLogout=()=>{
   localStorage.removeItem("userId")
   localStorage.removeItem("role")
   localStorage.removeItem("cartId")
+  localStorage.removeItem("cartId")
+  
   setIsLoggedIn(false)
   window.location.reload()
   navigate("/login")
@@ -61,14 +63,14 @@ const handleLogout=()=>{
             Orders
           </Link>
           
-          {/* ✅ Cart Button with realtime Badge */}
+         
           <Link
             to="/cart"
             className="relative bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
           >
             My Cart
 
-            {/* ✅ Badge */}
+          
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                 {cartCount}
