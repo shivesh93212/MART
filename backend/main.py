@@ -296,6 +296,14 @@ def update_cart(item_id:int,quantity:int,db:Session=Depends(get_db)):
         "quantity": cart_item.quantity
     }
 
+@app.get("/cart/user/{user_id}")
+def get_cart_by_user(user_id:int,db:Session=Depends(get_db)):
+    cart=db.query(Cart).filter(Cart.user_id==user_id).first()
+
+    if not cart:
+        raise HTTPException(404,"Cart not Found")
+    
+    return {"cart_id":cart.id}
 
     # ====================================================================ORDERS=================================================
 
