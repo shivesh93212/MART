@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getCartItems } from "../api/cartApi";
+import { getCartByUser, getCartItems } from "../api/cartApi";
 
 const CartContext = createContext();
 
@@ -7,24 +7,33 @@ export const CartProvider = ({ children }) => {
   const [cartCount, setCartCount] = useState(0);
 
   const refreshCartCount = async () => {
-    const cartId = localStorage.getItem("cartId");
-
-    if (!cartId) {
-      setCartCount(0);
-      return;
-    }
-
     try {
-      const items = await getCartItems(cartId);
+      const userId = Number(localStorage.getItem("userId"));
+
+      if (!userId) {
+        setCartCount(0);
+        return;
+      }
+
+      // ✅ user se cartId nikalna
+      const cartRes = await getCartByUser(userId);
+      localStorage.setItem("cartId", cartRes.cart_id);
+
+      // ✅ cart items fetch
+      const items = await getCartItems(cartRes.cart_id);
+
       const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
+
       setCartCount(totalQty);
     } catch (err) {
       setCartCount(0);
+      localStorage.removeItem("cartId");
+
     }
   };
 
   useEffect(() => {
-    refreshCartCount();
+    refreshCartCount(); // ✅ app load pe
   }, []);
 
   return (

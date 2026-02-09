@@ -21,3 +21,9 @@ export const deleteCartItem = async (itemId) => {
   const res = await api.delete(`/cart/item/${itemId}`);
   return res.data;
 };
+
+export const getCartByUser=async (userId)=>{
+     const res=await api.get(`/cart/user/${userId}`)
+
+     return res.data
+}

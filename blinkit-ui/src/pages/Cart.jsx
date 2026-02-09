@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import { deleteCartItem, getCartItems, updateCartItem } from "../api/cartApi";
 import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext"; // ✅ NEW: import CartContext
+import { useCart } from "../context/CartContext";
 
 export default function Cart() {
-  const cartId = localStorage.getItem("cartId");
   const [items, setItems] = useState([]);
 
-  const { refreshCartCount } = useCart(); // ✅ NEW: realtime badge refresh
+  const { refreshCartCount } = useCart();
 
   useEffect(() => {
-    if (cartId) fetchCart();
-  }, [cartId]);
+    fetchCart();
+  }, []);
 
   const fetchCart = async () => {
+    const cartId = localStorage.getItem("cartId"); // ✅ FIXED: always fresh
+
+    if (!cartId) {
+      setItems([]);
+      return;
+    }
+
     try {
       const data = await getCartItems(cartId);
       setItems(data);
@@ -26,14 +32,16 @@ export default function Cart() {
     if (qty < 0) return;
 
     await updateCartItem(itemId, qty);
-    fetchCart(); // ✅ refresh cart UI
-    refreshCartCount(); // ✅ NEW: update navbar badge
+
+    await fetchCart(); // ✅ FIXED: await
+    await refreshCartCount(); // ✅ FIXED: await
   };
 
   const handleDelete = async (itemId) => {
     await deleteCartItem(itemId);
-    fetchCart(); // ✅ refresh cart UI
-    refreshCartCount(); // ✅ NEW: update navbar badge
+
+    await fetchCart(); // ✅ FIXED: await
+    await refreshCartCount(); // ✅ FIXED: await
   };
 
   const totalAmount = items.reduce((sum, item) => sum + item.total_price, 0);
@@ -46,14 +54,12 @@ export default function Cart() {
         <p className="text-gray-600 text-lg">Cart is empty</p>
       ) : (
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Left Items */}
           <div className="md:col-span-2 space-y-4">
             {items.map((item) => (
               <div
                 key={item.id}
                 className="bg-white p-4 rounded-2xl shadow-sm flex gap-4 items-center"
               >
-                {/* Image */}
                 <div className="w-20 h-20 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
                   <img
                     src={`http://localhost:8000/${item.image}`}
@@ -62,7 +68,6 @@ export default function Cart() {
                   />
                 </div>
 
-                {/* Info */}
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">
                     {item.product_name}
@@ -82,7 +87,6 @@ export default function Cart() {
                   </button>
                 </div>
 
-                {/* Quantity */}
                 <div className="flex items-center gap-2 bg-green-50 border border-green-300 rounded-xl px-3 py-2">
                   <button
                     onClick={() => handleUpdate(item.id, item.quantity - 1)}
@@ -106,7 +110,6 @@ export default function Cart() {
             ))}
           </div>
 
-          {/* Right Summary */}
           <div className="bg-white rounded-2xl shadow-sm p-5 h-fit sticky top-24">
             <h3 className="text-lg font-bold text-gray-800 mb-4">
               Price Details

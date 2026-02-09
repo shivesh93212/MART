@@ -1,7 +1,7 @@
 import { createPaymentOrder, verifyPayment } from "../api/paymentApi";
 
 export default function Checkout() {
-  const userId = 1;
+  const userId = localStorage.getItem("userId");
 
   const handlePayment = async () => {
     try {

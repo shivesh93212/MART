@@ -19,17 +19,11 @@ const role=localStorage.getItem("role")
     setIsLoggedIn(!!token)
   },[])
 
-const handleLogout=()=>{
-  localStorage.removeItem("token")
-  localStorage.removeItem("userId")
-  localStorage.removeItem("role")
-  localStorage.removeItem("cartId")
-  localStorage.removeItem("cartId")
-  
-  setIsLoggedIn(false)
-  window.location.reload()
-  navigate("/login")
-}
+const handleLogout = () => {
+  localStorage.clear();
+  window.location.href = "/login";
+};
+
 
   return (
     <div className="bg-white shadow-sm sticky top-0 z-50">
@@ -78,7 +72,7 @@ const handleLogout=()=>{
             )}
           </Link>
 
-          {!isLoggedIn ?(<Link to="/login" classname="text-gray-700 font-medium">
+          {!isLoggedIn ?(<Link to="/login" className="text-gray-700 font-medium">
           Login
           </Link>
           ):(
