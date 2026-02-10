@@ -7,7 +7,7 @@ import { getCartByUser } from "../api/cartApi";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
+  
 
   const navigate = useNavigate();
   const { refreshCartCount } = useCart();
@@ -27,7 +27,7 @@ export default function Login() {
       localStorage.setItem("email", data.email);
 
       // ✅ Save role
-      localStorage.setItem("role", role);
+      localStorage.setItem("role", data.role);
 
       // ✅ Fetch cartId of this user (VERY IMPORTANT)
       try {
@@ -41,7 +41,7 @@ export default function Login() {
       await refreshCartCount();
 
       // ✅ Redirect
-      if (role === "admin") {
+      if (data.role === "admin") {
         navigate("/add-product");
       } else {
         navigate("/");
@@ -63,22 +63,6 @@ export default function Login() {
         </p>
 
         <form onSubmit={handleLogin} className="mt-6 space-y-4">
-          {/* ✅ Role Select */}
-          <div>
-            <label className="block font-semibold text-gray-700 mb-1">
-              Login As
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full border px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          {/* ✅ Email */}
           <div>
             <label className="block font-semibold text-gray-700 mb-1">
               Email
