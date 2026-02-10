@@ -57,5 +57,6 @@ def login(data:LoginModel,db:Session=Depends(get_db)):
         "token_type":"bearer",
         "user_id":db_email.id,
         "name":db_email.name,
-        "email":db_email.email
+        "email":db_email.email,
+        "role":db_email.role
     }

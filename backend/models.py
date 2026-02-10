@@ -11,7 +11,8 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(Text, nullable=False)
-
+    role=Column(String,default="user")
+    
     cart = relationship("Cart", back_populates="user",uselist=False)
 
 
