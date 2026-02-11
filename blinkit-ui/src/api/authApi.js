@@ -7,8 +7,11 @@ export const signupUser=async (payload)=>{
 }
 
 
-export const loginUser=async (payload)=>{
-    const res=await api.post("/auth/login",payload)
+export const loginUser = async (email, password) => {
+  const formData = new FormData();
+  formData.append("username", email);   // ⚡ backend expects username
+  formData.append("password", password);
 
-    return res.data
-}
+  const res = await api.post("/auth/login", formData);
+  return res.data;
+};

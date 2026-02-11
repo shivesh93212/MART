@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../api/authApi";
 import { useCart } from "../context/CartContext";
-// import { getCartByUser } from "../api/cartApi";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,7 +16,7 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const data = await loginUser({ email, password });
+      const data = await loginUser( email, password );
 
       
       localStorage.setItem("token", data.access_token);
