@@ -64,6 +64,7 @@ def add_product(
     name: str = Form(...),
     price: float = Form(...),
     quantity: int = Form(...),
+    category:str =Form(...),
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user)
@@ -80,6 +81,7 @@ def add_product(
         name=name,
         price=price,
         quantity=quantity,
+        category=category,
         image=image_path
     )
 
@@ -192,6 +194,10 @@ def get_all_item_in_cart(
 
     cart_data = []
     for item in cart_items:
+
+        if item.product is None:
+            continue
+        
         cart_data.append({
             "id": item.id,
             "cart_id": item.cart_id,

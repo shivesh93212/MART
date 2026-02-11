@@ -27,7 +27,8 @@ class Product(Base):
     quantity = Column(Integer, nullable=False)
     image = Column(String)
 
-
+    category=Column(String,default="General")
+    cart_items = relationship("CartItem", back_populates="product")
 
 # ================= CART TABLE =================
 
@@ -52,7 +53,7 @@ class CartItem(Base):
     quantity=Column(Integer,nullable=False,default=1)
 
     cart = relationship("Cart", back_populates="items")
-    product = relationship("Product")
+    product = relationship("Product", back_populates="cart_items")
 
 class Order(Base):
     __tablename__="orders"
