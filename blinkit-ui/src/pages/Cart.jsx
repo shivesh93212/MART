@@ -13,15 +13,9 @@ export default function Cart() {
   }, []);
 
   const fetchCart = async () => {
-    const cartId = localStorage.getItem("cartId"); // ✅ FIXED: always fresh
-
-    if (!cartId) {
-      setItems([]);
-      return;
-    }
-
+   
     try {
-      const data = await getCartItems(cartId);
+      const data = await getCartItems();
       setItems(data);
     } catch (err) {
       setItems([]);
@@ -33,15 +27,15 @@ export default function Cart() {
 
     await updateCartItem(itemId, qty);
 
-    await fetchCart(); // ✅ FIXED: await
-    await refreshCartCount(); // ✅ FIXED: await
+   fetchCart(); 
+   refreshCartCount(); 
   };
 
   const handleDelete = async (itemId) => {
     await deleteCartItem(itemId);
 
-    await fetchCart(); // ✅ FIXED: await
-    await refreshCartCount(); // ✅ FIXED: await
+     fetchCart(); 
+     refreshCartCount();
   };
 
   const totalAmount = items.reduce((sum, item) => sum + item.total_price, 0);

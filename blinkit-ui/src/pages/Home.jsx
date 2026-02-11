@@ -17,28 +17,31 @@ export default function Home() {
     (p.name || "").toLowerCase().includes((search || "").toLowerCase().trim())
   );
 
-  const userId = localStorage.getItem("userId"); // ✅ FIXED
-
   useEffect(() => {
     fetchProducts();
-    fetchCart(); // ✅ FIXED: always call
+    fetchCart();
   }, []);
 
   const fetchProducts = async () => {
-    const data = await getAllProducts();
-    setProducts(data);
+    try {
+      const data = await getAllProducts();
+      setProducts(data);
+    } catch (err) {
+      setProducts([]);
+    }
   };
 
   const fetchCart = async () => {
-    const cartId = localStorage.getItem("cartId"); // ✅ FIXED: always fresh
+    const token = localStorage.getItem("token");
 
-    if (!cartId) {
+    if (!token) {
       setCartItems([]);
       return;
     }
 
     try {
-      const data = await getCartItems(cartId);
+      const data = await getCartItems();
+      console.log("CART DATA:", data);
       setCartItems(data);
     } catch (err) {
       setCartItems([]);
@@ -46,30 +49,21 @@ export default function Home() {
   };
 
   const handleAdd = async (productId) => {
-    if (!userId) return;
-
-    const res = await addToCart(userId, productId, 1);
-
-    if (res.cart_id) {
-      localStorage.setItem("cartId", res.cart_id);
-    }
-
-    await fetchCart(); // ✅ FIXED: await
-    await refreshCartCount(); // ✅ FIXED: await
+    await addToCart(productId, 1);
+    await fetchCart();
+    await refreshCartCount();
   };
 
   const handleIncrease = async (itemId, qty) => {
     await updateCartItem(itemId, qty + 1);
-
-    await fetchCart(); // ✅ FIXED: await
-    await refreshCartCount(); // ✅ FIXED: await
+    await fetchCart();
+    await refreshCartCount();
   };
 
   const handleDecrease = async (itemId, qty) => {
     await updateCartItem(itemId, qty - 1);
-
-    await fetchCart(); // ✅ FIXED: await
-    await refreshCartCount(); // ✅ FIXED: await
+    await fetchCart();
+    await refreshCartCount();
   };
 
   return (

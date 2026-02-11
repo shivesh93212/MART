@@ -1,11 +1,10 @@
 import { createPaymentOrder, verifyPayment } from "../api/paymentApi";
 
 export default function Checkout() {
-  const userId = localStorage.getItem("userId");
 
   const handlePayment = async () => {
     try {
-      const orderData = await createPaymentOrder(userId);
+      const orderData = await createPaymentOrder();
 
       const options = {
         key: orderData.key,

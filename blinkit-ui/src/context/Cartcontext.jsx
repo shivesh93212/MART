@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getCartByUser, getCartItems } from "../api/cartApi";
+import { getCartItems } from "../api/cartApi";
 
 const CartContext = createContext();
 
@@ -8,32 +8,27 @@ export const CartProvider = ({ children }) => {
 
   const refreshCartCount = async () => {
     try {
-      const userId = Number(localStorage.getItem("userId"));
+      const token =localStorage.getItem("token");
 
-      if (!userId) {
+      if (!token) {
         setCartCount(0);
         return;
       }
 
-      // ✅ user se cartId nikalna
-      const cartRes = await getCartByUser(userId);
-      localStorage.setItem("cartId", cartRes.cart_id);
-
       // ✅ cart items fetch
-      const items = await getCartItems(cartRes.cart_id);
+      const items = await getCartItems();
 
       const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
 
       setCartCount(totalQty);
     } catch (err) {
       setCartCount(0);
-      localStorage.removeItem("cartId");
 
     }
   };
 
   useEffect(() => {
-    refreshCartCount(); // ✅ app load pe
+    refreshCartCount(); 
   }, []);
 
   return (

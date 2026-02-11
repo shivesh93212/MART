@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../api/authApi";
 import { useCart } from "../context/CartContext";
-import { getCartByUser } from "../api/cartApi";
+// import { getCartByUser } from "../api/cartApi";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,18 +18,18 @@ export default function Login() {
     try {
       const data = await loginUser({ email, password });
 
-      // ✅ Save auth data
+      
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("userId", data.user_id);
 
-      // ✅ Save user info
+      
       localStorage.setItem("name", data.name);
       localStorage.setItem("email", data.email);
 
-      // ✅ Save role
+    
       localStorage.setItem("role", data.role);
 
-      // ✅ Fetch cartId of this user (VERY IMPORTANT)
+      
       try {
         const cartRes = await getCartByUser(data.user_id);
         localStorage.setItem("cartId", cartRes.cart_id);
