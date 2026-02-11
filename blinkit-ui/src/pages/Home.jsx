@@ -72,13 +72,7 @@ export default function Home() {
     refreshCartCount();
   };
 
-  const categories = [
-    { name: "Fruits 🍎", path: "/" },
-    { name: "Vegetables 🥦", path: "/" },
-    { name: "Dairy 🥛", path: "/" },
-    { name: "Snacks 🍪", path: "/" },
-    { name: "Drinks 🥤", path: "/" },
-  ];
+  const categories = ["All", ...new Set(products.map((p)=>p.category))]
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -125,9 +119,15 @@ export default function Home() {
           {categories.map((cat, index) => (
             <button
               key={index}
-              className="whitespace-nowrap bg-white border border-gray-200 px-5 py-2 rounded-full font-semibold text-gray-700 shadow-sm hover:bg-green-600 hover:text-white transition"
-            >
-              {cat.name}
+              onClick={()=>setSelectedCategory(cat)}
+              className={`whitespace-nowrap px-5 py-2 rounded-full font-semibold shadow-sm transition
+          ${
+            selectedCategory === cat
+              ? "bg-green-600 text-white"
+              : "bg-white border border-gray-200 text-gray-700 hover:bg-green-600 hover:text-white"
+          }`}
+      >
+              {cat}
             </button>
           ))}
         </div>
