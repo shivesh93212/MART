@@ -6,7 +6,8 @@ import os
 load_dotenv()
 
 SECRET_KEY=str(os.getenv("SECRET_KEY"))
-ALGORITHM=str(os.getenv("ALGORITHM"))
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
 
 if SECRET_KEY is None:
     raise ValueError("Secret key is missing")
