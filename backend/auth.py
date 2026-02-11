@@ -1,5 +1,4 @@
-from fastapi import APIRouter,Depends,HTTPException
-from schemas import SignupModel,LoginModel
+from fastapi import APIRouter, Depends, HTTPException
 from database import SessionLocal
 from models import User
 from sqlalchemy.orm import Session
@@ -7,37 +6,16 @@ from passlib.context import CryptContext
 from utils import create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 
-router=APIRouter(prefix="/auth",tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
-pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def get_db():
-    db=SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-@router.post("/signup",response_model=SignupModel)
-def signup(user:SignupModel,db:Session=Depends(get_db)):
-    db_email=db.query(User).filter(User.email==user.email).first()
-
-    if db_email is not None:
-        raise HTTPException(status_code=400,detail="email alredy exists")
-   
-
-    
-    hashed=pwd_context.hash(user.password[:72])
-    new_user=User(
-        name=user.name,
-        email=user.email,
-        password=hashed
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
 
 
 @router.post("/login")
@@ -52,4 +30,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
     token = create_access_token({"user_id": user.id})
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user_id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role
+    }
