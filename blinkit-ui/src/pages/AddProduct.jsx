@@ -5,6 +5,7 @@ export default function AddProduct() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [category,setCategory] = useState("")
   const [image, setImage] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -19,6 +20,7 @@ export default function AddProduct() {
     formData.append("name", name);
     formData.append("price", price);
     formData.append("quantity", quantity);
+    formData.append("category",category)
     formData.append("image", image);
 
     try {
@@ -77,6 +79,18 @@ export default function AddProduct() {
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="Enter quantity"
             required
+          />
+        </div>
+
+        <div>
+          <label className="block font-semibold mb-1">Category</label>
+          <input
+          type="text"
+          className="w-full border px-4 py-2 rounded-lg outline-none focus:ring-2 focus-ring-green-500"
+          value={category}
+          onChange={(e)=>setCategory(e.target.value)}
+          placeholder="eg: Dairy, Snacks, Fruits"
+          required
           />
         </div>
 

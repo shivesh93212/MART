@@ -10,14 +10,22 @@ import { Link } from "react-router-dom";
 export default function Home() {
   const { refreshCartCount } = useCart();
   const { search } = useSearch();
-
+  
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const [selectedCategory,setSelectedCategory]= useState("All")
+  const search_categories = ["All",...new Set(products.map((p)=>p.category))] 
 
-  const filteredProducts = products.filter((p) =>
-    (p.name || "").toLowerCase().includes((search || "").toLowerCase().trim())
-  );
+  const filteredProducts = products.filter((p) =>{
+    const matchSearch=(p.name || "").toLowerCase().includes((search || "").toLowerCase().trim())
+    
+    const matchCategory = selectedCategory==="All" || p.category===selectedCategory
+
+    return matchSearch && matchCategory
+   });
+  
 
   useEffect(() => {
     fetchProducts();
@@ -74,10 +82,6 @@ export default function Home() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* USER CARD */}
-      <div className="max-w-6xl mx-auto px-4 mt-6">
-        <UserCard />
-      </div>
 
       {/* HERO SECTION */}
       <div className="max-w-6xl mx-auto px-4 mt-6">
@@ -131,15 +135,30 @@ export default function Home() {
 
       {/* PRODUCTS */}
       <div className="max-w-6xl mx-auto px-4 mt-10 pb-12">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg md:text-xl font-bold text-gray-800">
-            Best Deals For You 🔥
-          </h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+  <h2 className="text-lg md:text-xl font-bold text-gray-800">
+    Best Deals For You 🔥
+  </h2>
 
-          <p className="text-sm text-gray-500">
-            Showing {filteredProducts.length} products
-          </p>
-        </div>
+  <div className="flex items-center gap-4">
+    <select
+      value={selectedCategory}
+      onChange={(e) => setSelectedCategory(e.target.value)}
+      className="border px-4 py-2 rounded-xl bg-white text-gray-700 font-semibold shadow-sm outline-none"
+    >
+      {search_categories.map((cat) => (
+        <option key={cat} value={cat}>
+          {cat}
+        </option>
+      ))}
+    </select>
+
+    <p className="text-sm text-gray-500">
+      Showing products
+    </p>
+  </div>
+</div>
+
 
         {/* LOADING SKELETON */}
         {loading ? (
