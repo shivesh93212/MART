@@ -14,3 +14,9 @@ export const addProduct = async (formData) => {
 
   return res.data;
 };
+
+export const deleteProduct=async (id) =>{
+  const res=await api.delete(`/product/${id}`)
+
+  return res.data
+}

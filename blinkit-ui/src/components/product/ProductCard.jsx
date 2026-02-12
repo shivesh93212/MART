@@ -1,12 +1,30 @@
+import { Trash2 } from "lucide-react";
+
+
+
 export default function ProductCard({
   product,
   cartItem,
   onAdd,
   onIncrease,
   onDecrease,
+  onDelete,
 }) {
+
+  const role=localStorage.getItem("role")
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition p-3 flex flex-col">
+    <div className=" relative bg-white rounded-2xl shadow-sm hover:shadow-md transition p-3 flex flex-col">
+
+      {role=="admin" && (
+        <button 
+        onClick={()=>onDelete(product.id)}
+        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition z-10"
+        >
+          <Trash2 size={16}/>
+
+        </button>
+      )}
       <div className="h-32 flex items-center justify-center overflow-hidden">
         <img
           src={`http://localhost:8000/${product.image}`}

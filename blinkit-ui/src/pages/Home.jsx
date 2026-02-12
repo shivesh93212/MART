@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllProducts } from "../api/productApi";
+import { getAllProducts,deleteProduct } from "../api/productApi";
 import { addToCart, getCartItems, updateCartItem } from "../api/cartApi";
 import ProductGrid from "../components/product/ProductGrid";
 import { useCart } from "../context/CartContext";
@@ -71,6 +71,20 @@ export default function Home() {
     fetchCart();
     refreshCartCount();
   };
+
+  const handleDelete= async (id)=>{
+    const confirmDelete=window.confirm("Are you sure you want to delete this product?")
+     if(!confirmDelete){
+      return
+     }
+     try{
+      await deleteProduct(id)
+      fetchProducts()
+     }
+     catch(err){
+        alert("Delete failed")
+     }
+  }
 
   const categories = ["All", ...new Set(products.map((p)=>p.category))]
 
@@ -184,6 +198,7 @@ export default function Home() {
             onAdd={handleAdd}
             onIncrease={handleIncrease}
             onDecrease={handleDecrease}
+            onDelete={handleDelete}
           />
         )}
       </div>
