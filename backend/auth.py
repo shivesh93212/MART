@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from utils import create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
+from schemas import SignupModel
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,7 +17,24 @@ def get_db():
         yield db
     finally:
         db.close()
+@router.post("/signup")
+def signup(user:SignupModel,db:Session=Depends(get_db)):
+    user_email=db.query(User).filter(User.email==user.email).first()
 
+    if user_email:
+        raise HTTPException(400,"Email Aleready register")
+    
+    hashed=pwd_context.hash(user.password[:72])
+    new_user=User(
+        name=user.name,
+        email=user.email,
+        password=hashed
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {"message":"User Created Successfully!"}
 
 @router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

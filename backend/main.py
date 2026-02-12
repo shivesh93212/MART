@@ -104,7 +104,9 @@ def delete_product(
 
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-
+    
+    db.query(CartItem).filter(CartItem.product_id == id).delete()
+    
     db.delete(product)
     db.commit()
 
