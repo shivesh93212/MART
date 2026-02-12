@@ -7,6 +7,7 @@ export const signupUser=async (payload)=>{
 }
 
 
+
 export const loginUser = async (email, password) => {
   const formData = new FormData();
   formData.append("username", email);   // ⚡ backend expects username
