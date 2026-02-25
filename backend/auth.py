@@ -9,7 +9,10 @@ from schemas import SignupModel
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 
 def get_db():
     db = SessionLocal()
@@ -24,7 +27,7 @@ def signup(user:SignupModel,db:Session=Depends(get_db)):
     if user_email:
         raise HTTPException(400,"Email Aleready register")
     
-    hashed=pwd_context.hash(user.password[:72])
+    hashed=pwd_context.hash(user.password)
     new_user=User(
         name=user.name,
         email=user.email,
