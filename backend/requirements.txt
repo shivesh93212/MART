@@ -1,11 +1,13 @@
-gunicorn==21.2.0
-uvicorn[standard]
 fastapi
+uvicorn[standard]
+gunicorn
 sqlalchemy
 psycopg2-binary
-python-dotenv==1.0.1
+python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
 alembic
 pydantic
 python-multipart
+razorpay
+
