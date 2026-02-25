@@ -27,7 +27,7 @@ export default function ProductCard({
       )}
       <div className="h-32 flex items-center justify-center overflow-hidden">
         <img
-          src={`http://localhost:8000/${product.image}`}
+          src={`https://mart-ba0h.onrender.com/${product.image}`}
           alt={product.name}
           className="h-full object-contain"
         />
