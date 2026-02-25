@@ -14,10 +14,10 @@ export default function Register() {
     e.preventDefault();
       try{
         await signupUser({name,email,password})
-        const loginData=await loginUser({email,password})
+        const loginData=await loginUser(email,password)
         localStorage.setItem("token",loginData.access_token)
         localStorage.setItem("userId",loginData.user_id)
-        localStorage.setItem("role","user")
+        localStorage.setItem("role","loginData.role")
         localStorage.setItem("name",name)
         localStorage.setItem("email",email)
 
