@@ -56,7 +56,7 @@ export default function Cart() {
               >
                 <div className="w-20 h-20 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
                   <img
-                    src={product.image}
+                    src={item.image}
                     alt={item.product_name}
                     className="w-full h-full object-contain"
                   />
