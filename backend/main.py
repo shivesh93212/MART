@@ -12,6 +12,9 @@ import razorpay
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from deps import get_current_user
+import cloudinary
+import cloudinary.uploader
+
 
 app = FastAPI()
 
@@ -23,6 +26,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEY"),
+    api_secret=os.getenv("API_SECRET")
 )
 
 Base.metadata.create_all(bind=engine)
@@ -64,25 +73,32 @@ def add_product(
     name: str = Form(...),
     price: float = Form(...),
     quantity: int = Form(...),
-    category:str =Form(...),
+    category: str = Form(...),
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user)
 ):
+    # 🔒 Ensure only admin can add product
     require_admin(user_id, db)
 
-    filename = f"{uuid.uuid4()}_{image.filename}"
-    image_path = f"images/{filename}"
+    try:
+        # ☁️ Upload image to Cloudinary
+        result = cloudinary.uploader.upload(image.file)
 
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+        # 🌐 Get secure image URL
+        image_url = result["secure_url"]
 
+    except Exception as e:
+        # ❌ If upload fails
+        raise HTTPException(status_code=500, detail=f"Image upload failed: {e}")
+
+    # 🗄 Save product with Cloudinary URL (NOT local path)
     new_product = Product(
         name=name,
         price=price,
         quantity=quantity,
         category=category,
-        image=image_path
+        image=image_url  # ✅ Store full Cloudinary URL
     )
 
     db.add(new_product)
@@ -155,27 +171,30 @@ def update_image(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user)
 ):
+    # 🔒 Admin check
     require_admin(user_id, db)
 
     product = db.query(Product).filter(Product.id == id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    filename = f"{uuid.uuid4()}_{image.filename}"
-    image_path = f"images/{filename}"
-
     try:
-        with open(image_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"File save failed: {e}")
+        # ☁️ Upload new image to Cloudinary
+        result = cloudinary.uploader.upload(image.file)
 
-    product.image = image_path
+        # 🌐 Get new secure URL
+        image_url = result["secure_url"]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Image upload failed: {e}")
+
+    # 🔄 Update DB with new Cloudinary URL
+    product.image = image_url
+
     db.commit()
     db.refresh(product)
 
     return {"message": "Image updated successfully"}
-
 
 # ============================ CART =============================
 
