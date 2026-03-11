@@ -227,6 +227,7 @@ def get_all_item_in_cart(
             "product_name": item.product.name,
             "price": item.product.price,
             "image": item.product.image,
+            "stock": item.product.quantity,
             "total_price": item.quantity * item.product.price
         })
 
