@@ -68,7 +68,7 @@ export default function ProductCard({
             <span>{cartItem.quantity}</span>
 
             <button
-              onClick={() => onIncrease(cartItem.id, cartItem.quantity)} // ✅ NEW: increase qty
+              onClick={() => onIncrease(cartItem.id, cartItem.quantity,product.quantity)} // ✅ NEW: increase qty
               className="text-lg"
             >
               +

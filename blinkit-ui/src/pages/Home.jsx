@@ -71,19 +71,25 @@ export default function Home() {
   }
 }
 
-  const handleIncrease = async (itemId, qty) => {
+const handleIncrease = async (itemId, qty, stock) => {
+
+  // ✅ STOCK LIMIT CHECK
+  if (qty >= stock) {
+    alert("Maximum stock reached")
+    return
+  }
 
   // ✅ UI update first
   setCartItems((prev)=>
     prev.map((item)=>
-      item.id===itemId
-      ? {...item, quantity: qty+1}
+      item.id === itemId
+      ? {...item, quantity: qty + 1}
       : item
     )
   )
 
   try{
-    await updateCartItem(itemId, qty+1)
+    await updateCartItem(itemId, qty + 1)
     refreshCartCount()
   }
   catch(err){
@@ -93,24 +99,40 @@ export default function Home() {
 
   const handleDecrease = async (itemId, qty) => {
 
-  // ✅ agar quantity 1 hai to delete kar do
+  // ✅ qty = 1 → delete item
   if (qty <= 1) {
-    try {
+
+    // UI update first
+    setCartItems((prev)=>
+      prev.filter((item)=> item.id !== itemId)
+    )
+
+    try{
       await deleteCartItem(itemId)
-      fetchCart()
       refreshCartCount()
-    } catch(err) {
-      console.log(err)
     }
+    catch(err){
+      fetchCart()
+    }
+
     return
   }
 
-  try {
+  // ✅ UI update first
+  setCartItems((prev)=>
+    prev.map((item)=>
+      item.id === itemId
+      ? {...item, quantity: qty - 1}
+      : item
+    )
+  )
+
+  try{
     await updateCartItem(itemId, qty - 1)
-    fetchCart()
     refreshCartCount()
-  } catch(err) {
-    console.log(err)
+  }
+  catch(err){
+    fetchCart()
   }
 }
 
