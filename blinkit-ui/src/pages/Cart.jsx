@@ -23,7 +23,10 @@ export default function Cart() {
   };
 
   const handleUpdate = async (itemId, qty) => {
-    if (qty < 0) return;
+    if (qty <= 0) {
+    handleDelete(itemId)
+    return
+  }
 
     setItems((prevItems) =>
       prevItems.map((item) =>
