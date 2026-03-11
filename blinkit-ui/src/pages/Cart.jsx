@@ -114,7 +114,7 @@ export default function Cart() {
 
                 <div className="flex items-center gap-2 bg-green-50 border border-green-300 rounded-xl px-3 py-2">
                   <button
-                    onClick={() => handleUpdate(item.id, item.quantity - 1)}
+                    onClick={() => handleUpdate(item.id, item.quantity - 1,item.stock)}
                     className="font-bold text-green-700"
                   >
                     -
