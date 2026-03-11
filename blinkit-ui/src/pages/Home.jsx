@@ -56,18 +56,14 @@ export default function Home() {
 
  const handleAdd = async (productId) => {
 
-  // UI me new item add
-  setCartItems((prev)=>[
-    ...prev,
-    {product_id:productId, quantity:1}
-  ])
-
   try{
     await addToCart(productId,1)
+
+    await fetchCart()   // ✅ correct cart data
     refreshCartCount()
   }
   catch(err){
-    fetchCart()
+    console.log(err)
   }
 }
 
