@@ -23,19 +23,41 @@ export default function Cart() {
   };
 
   const handleUpdate = async (itemId, qty) => {
-    if (qty < 0) return;
+    if (qty < 1) return;
 
-    await updateCartItem(itemId, qty);
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              quantity: qty,
+              total_price: item.price * qty // ✅ CHANGE: total price bhi yahi calculate kar diya
+            }
+          : item
+      )
+    );
 
-   fetchCart(); 
-   refreshCartCount(); 
+    try {
+      // ✅ Backend update still same
+      await updateCartItem(itemId, qty);
+      refreshCartCount();
+    } catch (err) {
+      // ❗ Agar backend fail ho jaye to cart dubara fetch kar lenge
+      fetchCart();
+    }
   };
-
   const handleDelete = async (itemId) => {
-    await deleteCartItem(itemId);
+    setItems((prev)=>
+    prev.filter((item)=> item.id!==itemId))
+    try{
 
-     fetchCart(); 
-     refreshCartCount();
+      await deleteCartItem(itemId);
+      refreshCartCount()
+    }
+    catch(err){
+      fetchCart()
+    }
+
   };
 
   const totalAmount = items.reduce((sum, item) => sum + item.total_price, 0);
