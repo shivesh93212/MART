@@ -93,26 +93,38 @@ const handleIncrease = async (itemId, qty, stock) => {
   }
 }
 
-  const handleDecrease = async (itemId, qty) => {
+ const handleDecrease = async (itemId, qty) => {
 
-  // ✅ qty = 1 → delete item
   if (qty <= 1) {
-
-    // UI update first
-    setCartItems((prev)=>
-      prev.filter((item)=> item.id !== itemId)
-    )
-
-    try{
+    try {
       await deleteCartItem(itemId)
-      refreshCartCount()
-    }
-    catch(err){
-      fetchCart()
-    }
 
+      await fetchCart()   // ✅ sync cart again
+      refreshCartCount()
+
+    } catch(err){
+      console.log(err)
+    }
     return
   }
+
+  // optimistic update
+  setCartItems((prev)=>
+    prev.map((item)=>
+      item.id === itemId
+      ? {...item, quantity: qty - 1}
+      : item
+    )
+  )
+
+  try{
+    await updateCartItem(itemId, qty - 1)
+    refreshCartCount()
+  }
+  catch(err){
+    fetchCart()
+  }
+}
 
   // ✅ UI update first
   setCartItems((prev)=>
