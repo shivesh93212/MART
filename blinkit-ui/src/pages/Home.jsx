@@ -93,13 +93,13 @@ const handleIncrease = async (itemId, qty, stock) => {
   }
 }
 
- const handleDecrease = async (itemId, qty) => {
+const handleDecrease = async (itemId, qty) => {
 
   if (qty <= 1) {
     try {
       await deleteCartItem(itemId)
 
-      await fetchCart()   // ✅ sync cart again
+      await fetchCart()
       refreshCartCount()
 
     } catch(err){
@@ -112,8 +112,8 @@ const handleIncrease = async (itemId, qty, stock) => {
   setCartItems((prev)=>
     prev.map((item)=>
       item.id === itemId
-      ? {...item, quantity: qty - 1}
-      : item
+        ? {...item, quantity: qty - 1}
+        : item
     )
   )
 
@@ -126,23 +126,6 @@ const handleIncrease = async (itemId, qty, stock) => {
   }
 }
 
-  // ✅ UI update first
-  setCartItems((prev)=>
-    prev.map((item)=>
-      item.id === itemId
-      ? {...item, quantity: qty - 1}
-      : item
-    )
-  )
-
-  try{
-    await updateCartItem(itemId, qty - 1)
-    refreshCartCount()
-  }
-  catch(err){
-    fetchCart()
-  }
-}
 
   const handleDelete= async (id)=>{
     const confirmDelete=window.confirm("Are you sure you want to delete this product?")
