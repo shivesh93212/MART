@@ -93,23 +93,24 @@ export default function Home() {
 
   const handleDecrease = async (itemId, qty) => {
 
-  if(qty<=1) return
-
-  // ✅ UI update first
-  setCartItems((prev)=>
-    prev.map((item)=>
-      item.id===itemId
-      ? {...item, quantity: qty-1}
-      : item
-    )
-  )
-
-  try{
-    await updateCartItem(itemId, qty-1)
-    refreshCartCount()
+  // ✅ agar quantity 1 hai to delete kar do
+  if (qty <= 1) {
+    try {
+      await deleteCartItem(itemId)
+      fetchCart()
+      refreshCartCount()
+    } catch(err) {
+      console.log(err)
+    }
+    return
   }
-  catch(err){
+
+  try {
+    await updateCartItem(itemId, qty - 1)
     fetchCart()
+    refreshCartCount()
+  } catch(err) {
+    console.log(err)
   }
 }
 
