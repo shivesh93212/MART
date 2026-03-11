@@ -93,7 +93,7 @@ const handleIncrease = async (itemId, qty, stock) => {
   }
 }
 
-cconst handleDecrease = async (itemId, qty) => {
+const handleDecrease = async (itemId, qty) => {
 
   if (qty <= 1) {
     try {
