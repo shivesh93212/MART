@@ -23,7 +23,7 @@ export default function Cart() {
   };
 
   const handleUpdate = async (itemId, qty) => {
-    if (qty <= 0) {
+    if (qty < 0) {
     handleDelete(itemId)
     return
   }
