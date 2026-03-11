@@ -54,23 +54,64 @@ export default function Home() {
     }
   };
 
-  const handleAdd = async (productId) => {
-    await addToCart(productId, 1);
-    fetchCart();
-    refreshCartCount();
-  };
+ const handleAdd = async (productId) => {
+
+  // UI me new item add
+  setCartItems((prev)=>[
+    ...prev,
+    {product_id:productId, quantity:1}
+  ])
+
+  try{
+    await addToCart(productId,1)
+    refreshCartCount()
+  }
+  catch(err){
+    fetchCart()
+  }
+}
 
   const handleIncrease = async (itemId, qty) => {
-    await updateCartItem(itemId, qty + 1);
-    fetchCart();
-    refreshCartCount();
-  };
+
+  // ✅ UI update first
+  setCartItems((prev)=>
+    prev.map((item)=>
+      item.id===itemId
+      ? {...item, quantity: qty+1}
+      : item
+    )
+  )
+
+  try{
+    await updateCartItem(itemId, qty+1)
+    refreshCartCount()
+  }
+  catch(err){
+    fetchCart() // fallback
+  }
+}
 
   const handleDecrease = async (itemId, qty) => {
-    await updateCartItem(itemId, qty - 1);
-    fetchCart();
-    refreshCartCount();
-  };
+
+  if(qty<=1) return
+
+  // ✅ UI update first
+  setCartItems((prev)=>
+    prev.map((item)=>
+      item.id===itemId
+      ? {...item, quantity: qty-1}
+      : item
+    )
+  )
+
+  try{
+    await updateCartItem(itemId, qty-1)
+    refreshCartCount()
+  }
+  catch(err){
+    fetchCart()
+  }
+}
 
   const handleDelete= async (id)=>{
     const confirmDelete=window.confirm("Are you sure you want to delete this product?")
