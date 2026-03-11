@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllProducts,deleteProduct } from "../api/productApi";
-import { addToCart, getCartItems, updateCartItem } from "../api/cartApi";
+import { addToCart, getCartItems, updateCartItem,deleteCartItem } from "../api/cartApi";
 import ProductGrid from "../components/product/ProductGrid";
 import { useCart } from "../context/CartContext";
 import { useSearch } from "../context/SearchContext";
@@ -93,13 +93,13 @@ const handleIncrease = async (itemId, qty, stock) => {
   }
 }
 
-const handleDecrease = async (itemId, qty) => {
+cconst handleDecrease = async (itemId, qty) => {
 
   if (qty <= 1) {
     try {
       await deleteCartItem(itemId)
 
-      await fetchCart()
+      await fetchCart()   // backend se fresh cart
       refreshCartCount()
 
     } catch(err){
@@ -124,6 +124,7 @@ const handleDecrease = async (itemId, qty) => {
   catch(err){
     fetchCart()
   }
+
 }
 
 
