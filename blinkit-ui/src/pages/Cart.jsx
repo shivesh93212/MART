@@ -22,8 +22,14 @@ export default function Cart() {
     }
   };
 
-  const handleUpdate = async (itemId, qty) => {
-    if (qty < 1) {
+  const handleUpdate = async (itemId, qty,stock) => {
+
+    if (qty > stock) {
+    alert("Maximum stock reached")
+    return
+  }
+
+    if (qty <1) {
     handleDelete(itemId)
     return
   }
@@ -119,7 +125,7 @@ export default function Cart() {
                   </span>
 
                   <button
-                    onClick={() => handleUpdate(item.id, item.quantity + 1)}
+                    onClick={() => handleUpdate(item.id, item.quantity + 1,item.stock)}
                     className="font-bold text-green-700"
                   >
                     +
